@@ -4,7 +4,6 @@ import com.example.trytosmth.dao.exception.DbException;
 import com.example.trytosmth.model.FireExtinguisherData;
 import com.example.trytosmth.service.FireExtinguisherService;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -18,22 +17,18 @@ import javafx.util.Callback;
 
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainController {
+
     private final Button checkButton = new Button("Перевірити термін придатності");
     private final Button replaceButton = new Button("Замінити");
     private final Button addButton = new Button("Додати");
-    private ObservableList<FireExtinguisherData> fireExtinguishers = FXCollections.observableArrayList();
-
-    final ObservableList<String> expiredFireExtinguishers = FXCollections.observableArrayList();
-
+    private final TextArea resultTextArea = new TextArea();
+    private TableView<FireExtinguisherData> tableView; // Поле для TableView
 
     private final FireExtinguisherService fireExtinguisherService = new FireExtinguisherService();
-    final TextArea resultTextArea = new TextArea();
-    TableView<FireExtinguisherData> tableView; // Поле для TableView
 
     public Scene createScene() {
         // Створення панелі вкладок
@@ -41,18 +36,12 @@ public class MainController {
         // Створення вкладки "Info"
         Tab infoTab = new Tab("Info");
 
-        // Встановлення текстового вмісту для вкладки "Info"
-        Label infoLabel = new Label("Курсова робота з ІПЗ\nВиконав студент 2-го курсу з групи ІО-24\nСевастьянов Максим");
-        infoLabel.setStyle("-fx-font-size: 16px;"); // Задання розміру шрифту
-        infoLabel.setPadding(new Insets(20)); // Задання відступу
-
         // Створення контейнера для вмісту вкладки "Info"
-        VBox infoContent = new VBox(infoLabel);
+        VBox infoContent = new VBox(createInfoLabel());
         infoContent.setAlignment(Pos.CENTER); // Центрування вмісту
 
         // Встановлення вмісту вкладки "Info"
         infoTab.setContent(infoContent);
-
 
         // Створення вкладки "Menu"
         Tab menuTab = new Tab("Menu");
@@ -73,6 +62,14 @@ public class MainController {
         Scene scene = new Scene(root, 400, 300);
         scene.getStylesheets().add(Paths.get("src/styles.css").toUri().toString());
         return scene;
+    }
+
+    public Label createInfoLabel() {
+        // Встановлення текстового вмісту для вкладки "Info"
+        Label infoLabel = new Label("Курсова робота з ІПЗ\nВиконав студент 2-го курсу з групи ІО-24\nСевастьянов Максим");
+        infoLabel.setStyle("-fx-font-size: 16px;"); // Задання розміру шрифту
+        infoLabel.setPadding(new Insets(20)); // Задання відступу
+        return infoLabel;
     }
 
     private Node createMenuContent() {
@@ -109,6 +106,18 @@ public class MainController {
         // Створення стовпця для кнопки видалення
         TableColumn<FireExtinguisherData, Void> deleteColumn = new TableColumn<>("Видалити");
         deleteColumn.setPrefWidth(100);
+        deleteColumn.setCellFactory(getDeleteFireExtinguisherCallback());
+
+        tableView.getColumns().addAll(locationColumn, expirationDateColumn, deleteColumn);
+
+        // Додавання таблиці до панелі
+        BorderPane listPane = new BorderPane();
+        listPane.setCenter(tableView);
+
+        return listPane;
+    }
+
+    private Callback<TableColumn<FireExtinguisherData, Void>, TableCell<FireExtinguisherData, Void>> getDeleteFireExtinguisherCallback() {
         Callback<TableColumn<FireExtinguisherData, Void>, TableCell<FireExtinguisherData, Void>> cellFactory = new Callback<>() {
             @Override
             public TableCell<FireExtinguisherData, Void> call(final TableColumn<FireExtinguisherData, Void> param) {
@@ -116,24 +125,19 @@ public class MainController {
                     private final Button deleteButton = new Button("Видалити");
 
                     {
-                        deleteButton.setOnAction((event) -> {
-                            FireExtinguisherData extinguisher = getTableView().getItems().get(getIndex());
-                            try {
-                                List<FireExtinguisherData> updatedList = fireExtinguisherService.delete(extinguisher); // Видалення вогнегасника з бази даних
-                                fireExtinguishers.clear();
-                                fireExtinguishers.addAll(updatedList);
-                                tableView.setItems(FXCollections.observableArrayList(updatedList)); // Оновлення таблиці
-                                tableView.refresh();
-                            } catch (DbException e) {
-                                e.printStackTrace();
-                                Alert alert = new Alert(Alert.AlertType.ERROR);
-                                alert.setTitle("Помилка");
-                                alert.setHeaderText(null);
-                                alert.setContentText("Помилка при видаленні вогнегасника з бази даних.");
-                                alert.showAndWait();
-                            }
-                        });
+                        deleteButton.setOnAction((event) -> deleteFireExtinguisherAction());
+                    }
 
+                    private void deleteFireExtinguisherAction() {
+                        FireExtinguisherData extinguisher = getTableView().getItems().get(getIndex());
+                        try {
+                            List<FireExtinguisherData> updatedList = fireExtinguisherService.delete(extinguisher); // Видалення вогнегасника з бази даних
+                            tableView.setItems(FXCollections.observableArrayList(updatedList)); // Оновлення таблиці
+                            tableView.refresh();
+                        } catch (DbException e) {
+                            e.printStackTrace();
+                            showErrorAlert("Помилка", "Помилка при видаленні вогнегасника з бази даних.");
+                        }
                     }
 
                     @Override
@@ -149,29 +153,20 @@ public class MainController {
                 return cell;
             }
         };
-        deleteColumn.setCellFactory(cellFactory);
+        return cellFactory;
+    }
 
-        tableView.getColumns().addAll(locationColumn, expirationDateColumn, deleteColumn);
-
-        // Додавання таблиці до панелі
-        BorderPane listPane = new BorderPane();
-        listPane.setCenter(tableView);
-
-        return listPane;
+    private void showErrorAlert(String title, String description) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(description);
+        alert.showAndWait();
     }
 
     private void checkExpirationDate() {
-        // Очищення попереднього результату
-        expiredFireExtinguishers.clear();
-
-        // Перевірка терміну придатності
-        for (FireExtinguisherData extinguisher : fireExtinguisherService.getAll()) {
-            if (isExpired(extinguisher.getExpirationDate())) {
-                expiredFireExtinguishers.add(extinguisher.getLocation());
-            }
-        }
-
         // Оновлення тексту у TextArea
+        List<String> expiredFireExtinguishers =  fireExtinguisherService.getExpiredFireExtinguishersName();
         if (!expiredFireExtinguishers.isEmpty()) {
             resultTextArea.setText("Прострочені вогнегасники: \n" + String.join("\n", expiredFireExtinguishers));
         } else {
@@ -179,35 +174,12 @@ public class MainController {
         }
     }
 
-
-    private boolean isExpired(LocalDate expirationDate) {
-        // Перевірка чи прострочений термін придатності
-        LocalDate currentDate = LocalDate.now();
-        return currentDate.isAfter(expirationDate);
-    }
-
     private void replaceExpiredFireExtinguishers() {
-        // Заміна прострочених вогнегасників та оновлення даних у таблиці
-        List<FireExtinguisherData> updatedList = new ArrayList<>();
-
-        for (FireExtinguisherData extinguisher : fireExtinguisherService.getAll()) {
-            if (isExpired(extinguisher.getExpirationDate())) {
-                extinguisher.setExpirationDate(LocalDate.now().plusYears(1));
-                fireExtinguisherService.update(extinguisher);
-            }
-            updatedList.add(extinguisher); // Додаємо оновлені дані до списку
-        }
-
-        // Оновлюємо список fireExtinguishers
-        fireExtinguishers.clear();
-        fireExtinguishers.addAll(updatedList);
-
-        // Оновлення тексту у TextArea
-        resultTextArea.setText("Вогнегасники замінені.");
-
         // Оновлення таблиці
         if (tableView != null) {
-            tableView.setItems(FXCollections.observableArrayList(updatedList));
+            // Оновлення тексту у TextArea
+            resultTextArea.setText("Вогнегасники замінені.");
+            tableView.setItems(FXCollections.observableArrayList(fireExtinguisherService.replaceExpiredFireExtinguisher()));
         }
     }
 
@@ -221,43 +193,7 @@ public class MainController {
 
         // Створення кнопки "Ок"
         Button addButton = new Button("Додати");
-        addButton.setOnAction(event -> {
-            // Отримання даних з полів
-            String location = locationField.getText();
-            LocalDate expirationDate = expirationDatePicker.getValue();
-
-            // Валідація введених даних
-            if (location.isEmpty() || expirationDate == null) {
-                // Повідомлення про помилку
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Помилка");
-                alert.setHeaderText(null);
-                alert.setContentText("Будь ласка, заповніть всі поля.");
-                alert.showAndWait();
-            } else {
-                // Створення нового вогнегасника та додавання його до бази даних
-                FireExtinguisherData newExtinguisher = new FireExtinguisherData(location, expirationDate);
-                try {
-                    fireExtinguisherService.insert(newExtinguisher);
-
-                    // Оновлення таблиці
-                    fireExtinguishers.add(newExtinguisher);
-                    tableView.setItems(FXCollections.observableArrayList(fireExtinguisherService.getAll()));
-                    tableView.refresh();
-
-                    // Закриття вікна
-                    stage.close();
-                } catch (DbException e) {
-                    // Обробка помилки бази даних
-                    e.printStackTrace();
-                    Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Помилка бази даних");
-                    alert.setHeaderText(null);
-                    alert.setContentText("Помилка при додаванні вогнегасника.");
-                    alert.showAndWait();
-                }
-            }
-        });
+        addButton.setOnAction(event -> createNewFireExtinguisherAction(stage, locationField, expirationDatePicker));
 
         // Створення макету та встановлення його для вікна
         VBox layout = new VBox(10);
@@ -271,5 +207,34 @@ public class MainController {
         layout.setPadding(new Insets(10));
         stage.setScene(new Scene(layout));
         stage.show();
+    }
+
+    private void createNewFireExtinguisherAction(Stage stage, TextField locationField, DatePicker expirationDatePicker) {
+        // Отримання даних з полів
+        String location = locationField.getText();
+        LocalDate expirationDate = expirationDatePicker.getValue();
+
+        // Валідація введених даних
+        if (location.isEmpty() || expirationDate == null) {
+            // Повідомлення про помилку
+            showErrorAlert("Помилка", "Будь ласка, заповніть всі поля.");
+        } else {
+            // Створення нового вогнегасника та додавання його до бази даних
+            FireExtinguisherData newExtinguisher = new FireExtinguisherData(location, expirationDate);
+            try {
+                fireExtinguisherService.insert(newExtinguisher);
+
+                // Оновлення таблиці
+                tableView.setItems(FXCollections.observableArrayList(fireExtinguisherService.getAll()));
+                tableView.refresh();
+
+                // Закриття вікна
+                stage.close();
+            } catch (DbException e) {
+                // Обробка помилки бази даних
+                e.printStackTrace();
+                showErrorAlert("Помилка бази даних", "Помилка при додаванні вогнегасника.");
+            }
+        }
     }
 }

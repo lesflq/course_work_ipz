@@ -57,4 +57,25 @@ public class FireExtinguisherService {
     public void insert(FireExtinguisherData newExtinguisher) throws DbException {
         fireExtinguisherDao.insert(newExtinguisher);
     }
+
+    public List<FireExtinguisherData> replaceExpiredFireExtinguisher() {
+        for (FireExtinguisherData extinguisher : getAll()) {
+            if (isExpired(extinguisher.getExpirationDate())) {
+                extinguisher.setExpirationDate(LocalDate.now().plusYears(1));
+                update(extinguisher);
+            }
+        }
+        return getAll();
+    }
+
+    public List<String> getExpiredFireExtinguishersName() {
+        List<String> expiredFireExtinguishers = new ArrayList<>();
+        // Перевірка терміну придатності
+        for (FireExtinguisherData extinguisher : getAll()) {
+            if (isExpired(extinguisher.getExpirationDate())) {
+                expiredFireExtinguishers.add(extinguisher.getLocation());
+            }
+        }
+        return expiredFireExtinguishers;
+    }
 }
