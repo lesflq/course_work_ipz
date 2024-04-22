@@ -59,7 +59,7 @@ public class MainController {
         root.setCenter(tabPane);
 
         // Створення сцени та відображення вікна
-        Scene scene = new Scene(root, 400, 300);
+        Scene scene = new Scene(root, 500, 450);
         scene.getStylesheets().add(Paths.get("src/styles.css").toUri().toString());
         return scene;
     }
@@ -105,7 +105,7 @@ public class MainController {
 
         // Створення стовпця для кнопки видалення
         TableColumn<FireExtinguisherData, Void> deleteColumn = new TableColumn<>("Видалити");
-        deleteColumn.setPrefWidth(100);
+        deleteColumn.setPrefWidth(150);
         deleteColumn.setCellFactory(getDeleteFireExtinguisherCallback());
 
         tableView.getColumns().addAll(locationColumn, expirationDateColumn, deleteColumn);
