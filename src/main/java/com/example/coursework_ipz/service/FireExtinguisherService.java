@@ -1,8 +1,8 @@
-package com.example.trytosmth.service;// FireExtinguisherModel.java
+package com.example.coursework_ipz.service;// FireExtinguisherModel.java
 
-import com.example.trytosmth.dao.FireExtinguisherDao;
-import com.example.trytosmth.dao.exception.DbException;
-import com.example.trytosmth.model.FireExtinguisherData;
+import com.example.coursework_ipz.dao.FireExtinguisherDao;
+import com.example.coursework_ipz.dao.exception.DbException;
+import com.example.coursework_ipz.model.FireExtinguisherData;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 

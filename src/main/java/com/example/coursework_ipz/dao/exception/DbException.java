@@ -1,4 +1,4 @@
-package com.example.trytosmth.dao.exception;
+package com.example.coursework_ipz.dao.exception;
 
 public class DbException extends Exception {
 

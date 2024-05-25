@@ -1,7 +1,7 @@
-package com.example.trytosmth.dao;
+package com.example.coursework_ipz.dao;
 
-import com.example.trytosmth.model.FireExtinguisherData;
-import com.example.trytosmth.dao.exception.DbException;
+import com.example.coursework_ipz.model.FireExtinguisherData;
+import com.example.coursework_ipz.dao.exception.DbException;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -14,14 +14,17 @@ public class FireExtinguisherDao {
     private static final String INSERT_FIRE_EXTINGUISHER = "INSERT INTO fire_extinguishers (location, expirationDate) VALUES (?, ?);";
     private static final String UPDATE_FIRE_EXTINGUISHER = "UPDATE fire_extinguishers SET expirationDate=(?) WHERE id=(?);";
 
-    private final DbManager dbManager;
+    private final DbManager dbManagerMySQL;
 
     public FireExtinguisherDao() {
-        dbManager = DbManager.getInstance();
+        dbManagerMySQL = DbManagerMySQL.getInstance();
+    }
+    public FireExtinguisherDao(DbManager dbManager) {
+        dbManagerMySQL = dbManager;
     }
 
     public FireExtinguisherData getById(long id) throws DbException {
-        try (Connection connection = dbManager.getConnection();
+        try (Connection connection = dbManagerMySQL.getConnection();
              PreparedStatement statement = connection.prepareStatement(GET_FIRE_EXTINGUISHER_ID)) {
             int k = 0;
             statement.setLong(++k, id);
@@ -46,7 +49,7 @@ public class FireExtinguisherDao {
 
     public List<FireExtinguisherData> getAll() throws DbException {
         List<FireExtinguisherData> users = new ArrayList<>();
-        try (Connection connection = dbManager.getConnection();
+        try (Connection connection = dbManagerMySQL.getConnection();
              Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(GET_FIRE_EXTINGUISHERS)) {
             while (resultSet.next()) {
@@ -58,7 +61,7 @@ public class FireExtinguisherDao {
         return users;
     }
     public List<FireExtinguisherData> delete(FireExtinguisherData extinguisher) throws DbException {
-        try (Connection conn = dbManager.getConnection()) {
+        try (Connection conn = dbManagerMySQL.getConnection()) {
             String sql = "DELETE FROM fire_extinguishers WHERE location = ?";
             try (PreparedStatement stmt = conn.prepareStatement(sql)) {
                 stmt.setString(1, extinguisher.getLocation());
@@ -75,7 +78,7 @@ public class FireExtinguisherDao {
     public void insert(FireExtinguisherData fireExtinguisher) throws DbException {
         Connection connection = null;
         try {
-            connection = dbManager.getConnection();
+            connection = dbManagerMySQL.getConnection();
             connection.setAutoCommit(false);
             connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
             processInsert(connection, fireExtinguisher);
@@ -108,7 +111,7 @@ public class FireExtinguisherDao {
 
 
     public void update(FireExtinguisherData fireExtinguisher) throws DbException {
-        try (Connection connection = dbManager.getConnection();
+        try (Connection connection = dbManagerMySQL.getConnection();
              PreparedStatement statement = connection.prepareStatement(UPDATE_FIRE_EXTINGUISHER)) {
             int k = 0;
             statement.setDate(++k, Date.valueOf(fireExtinguisher.getExpirationDate()));

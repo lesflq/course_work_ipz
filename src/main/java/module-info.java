@@ -4,14 +4,18 @@ module com.example.trytosmth {
 
     requires com.dlsc.formsfx;
     requires java.sql;
+    requires junit;
+    requires mockito.all;
     requires commons.dbcp;
 
-    opens com.example.trytosmth to javafx.fxml;
-    exports com.example.trytosmth;
-    exports com.example.trytosmth.dao;
-    opens com.example.trytosmth.dao to javafx.fxml;
-    exports com.example.trytosmth.model;
-    opens com.example.trytosmth.model to javafx.fxml;
-    exports com.example.trytosmth.service;
-    opens com.example.trytosmth.service to javafx.fxml;
+    requires org.testng;
+
+    opens com.example.coursework_ipz to javafx.fxml;
+    exports com.example.coursework_ipz;
+    exports com.example.coursework_ipz.dao;
+    opens com.example.coursework_ipz.dao to javafx.fxml, mockito.all;
+    exports com.example.coursework_ipz.model;
+    opens com.example.coursework_ipz.model to javafx.fxml;
+    exports com.example.coursework_ipz.service;
+    opens com.example.coursework_ipz.service to javafx.fxml;
 }

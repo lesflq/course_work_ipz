@@ -1,8 +1,8 @@
-package com.example.trytosmth;
+package com.example.coursework_ipz;
 
-import com.example.trytosmth.dao.exception.DbException;
-import com.example.trytosmth.model.FireExtinguisherData;
-import com.example.trytosmth.service.FireExtinguisherService;
+import com.example.coursework_ipz.dao.exception.DbException;
+import com.example.coursework_ipz.model.FireExtinguisherData;
+import com.example.coursework_ipz.service.FireExtinguisherService;
 import javafx.collections.FXCollections;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -25,10 +25,10 @@ public class MainController {
     private final Button checkButton = new Button("Перевірити термін придатності");
     private final Button replaceButton = new Button("Замінити");
     private final Button addButton = new Button("Додати");
-    private final TextArea resultTextArea = new TextArea();
+    final TextArea resultTextArea = new TextArea();
     private TableView<FireExtinguisherData> tableView; // Поле для TableView
 
-    private final FireExtinguisherService fireExtinguisherService = new FireExtinguisherService();
+    FireExtinguisherService fireExtinguisherService = new FireExtinguisherService();
 
     public Scene createScene() {
         // Створення панелі вкладок
@@ -88,7 +88,7 @@ public class MainController {
         return menuPane;
     }
 
-    private BorderPane createListContent() {
+    BorderPane createListContent() {
 
         // Створення таблиці
         tableView = new TableView<>();
@@ -164,7 +164,7 @@ public class MainController {
         alert.showAndWait();
     }
 
-    private void checkExpirationDate() {
+    void checkExpirationDate() {
         // Оновлення тексту у TextArea
         List<String> expiredFireExtinguishers =  fireExtinguisherService.getExpiredFireExtinguishersName();
         if (!expiredFireExtinguishers.isEmpty()) {
@@ -174,7 +174,7 @@ public class MainController {
         }
     }
 
-    private void replaceExpiredFireExtinguishers() {
+    void replaceExpiredFireExtinguishers() {
         // Оновлення таблиці
         if (tableView != null) {
             // Оновлення тексту у TextArea

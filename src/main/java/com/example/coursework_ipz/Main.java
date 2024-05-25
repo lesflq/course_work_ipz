@@ -1,4 +1,4 @@
-package com.example.trytosmth;
+package com.example.coursework_ipz;
 
 import javafx.application.Application;
 import javafx.stage.Stage;

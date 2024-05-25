@@ -1,7 +1,7 @@
-package com.example.trytosmth.model;
+package com.example.coursework_ipz.model;
 
-import java.sql.Date;
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class FireExtinguisherData {
 
@@ -36,7 +36,21 @@ public class FireExtinguisherData {
         return id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FireExtinguisherData that = (FireExtinguisherData) o;
+        return Objects.equals(id, that.id) && Objects.equals(location, that.location) && Objects.equals(expirationDate, that.expirationDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, location, expirationDate);
+    }
+
     public void setId(Long id) {
         this.id = id;
     }
+
 }

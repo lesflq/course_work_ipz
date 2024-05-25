@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Created-By: Your Name (Your Company)
+Main-Class: com.example.coursework_ipz.Main_Executive
+Class-Path: .
+
+
