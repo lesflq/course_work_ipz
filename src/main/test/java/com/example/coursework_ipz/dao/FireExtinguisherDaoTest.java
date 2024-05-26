@@ -78,6 +78,54 @@ public class FireExtinguisherDaoTest {
         assertEquals("Unexpected FireExtinguisherData", data2, dataList.get(1));
     }
 
+    @Test
+    public void testDelete() throws DbException, SQLException {
+        // Arrange
+        FireExtinguisherData data1 = new FireExtinguisherData();
+        data1.setId(1L);
+        data1.setLocation("Location1");
+        data1.setExpirationDate(LocalDate.of(2025, 5, 24));
+
+        FireExtinguisherData data2 = new FireExtinguisherData();
+        data2.setId(2L);
+        data2.setLocation("Location2");
+        data2.setExpirationDate(LocalDate.of(2025, 5, 25));
+
+        insertData(data1);
+        insertData(data2);
+
+        // Act
+        List<FireExtinguisherData> dataListBeforeDelete = fireExtinguisherDao.getAll();
+        assertEquals("Unexpected number of FireExtinguisherData before delete", 2, dataListBeforeDelete.size());
+
+        fireExtinguisherDao.delete(data1);
+        List<FireExtinguisherData> dataListAfterDelete = fireExtinguisherDao.getAll();
+
+        // Assert
+        assertEquals("Unexpected number of FireExtinguisherData after delete", 1, dataListAfterDelete.size());
+        assertEquals("Unexpected FireExtinguisherData", data2, dataListAfterDelete.get(0));
+    }
+
+    @Test
+    public void testInsert() throws DbException, SQLException {
+        // Arrange
+        FireExtinguisherData data = new FireExtinguisherData();
+        data.setId(1L);  // Це значення може бути ігноровано, якщо використовується AUTO_INCREMENT
+        data.setLocation("NewLocation");
+        data.setExpirationDate(LocalDate.of(2025, 5, 24));
+
+        // Act
+        fireExtinguisherDao.insert(data);
+        List<FireExtinguisherData> dataList = fireExtinguisherDao.getAll();
+
+        // Assert
+        assertEquals("Unexpected number of FireExtinguisherData after insert", 1, dataList.size());
+        FireExtinguisherData actual = dataList.get(0);
+        assertNotNull("Expected non-null FireExtinguisherData", actual);
+        assertEquals("Unexpected location", "NewLocation", actual.getLocation());
+        assertEquals("Unexpected expiration date", LocalDate.of(2025, 5, 24), actual.getExpirationDate());
+    }
+
     private void createTable() throws SQLException {
         connection.createStatement().executeUpdate("CREATE TABLE fire_extinguishers (" +
                 "id INT PRIMARY KEY AUTO_INCREMENT, " +

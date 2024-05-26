@@ -1,9 +1,11 @@
 package com.example.coursework_ipz.service;
 
+import com.example.coursework_ipz.dao.exception.DbException;
 import com.example.coursework_ipz.model.FireExtinguisherData;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,9 +41,6 @@ public class FireExtinguisherServiceTest {
             assertFalse(service.isExpired(extinguisher.getExpirationDate())); // Жоден не має бути простроченим
         }
     }
-
-
-
     @Test
     public void testReplaceExpiredFireExtinguisher() {
         List<FireExtinguisherData> updatedList = service.replaceExpiredFireExtinguisher();
